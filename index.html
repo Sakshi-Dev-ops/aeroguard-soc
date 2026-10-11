@@ -47,6 +47,29 @@
       font-size: 14px;
     }
 
+    /* Tutorial Step Box Styling */
+    .tutorial-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .tutorial-step {
+      background-color: #0d1117;
+      border: 1px solid #30363d;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+
+    .step-num {
+      color: #58a6ff;
+      font-weight: bold;
+      display: inline-block;
+      margin-right: 6px;
+    }
+
     .example-container {
       display: flex;
       gap: 15px;
@@ -244,12 +267,33 @@
 </head>
 <body>
 
-  <!-- PAGE 1: INFORMATIONAL OVERVIEW SCREEN (WRITTEN IN NATURAL STUDENT VOICE) -->
+  <!-- PAGE 1: INFORMATIONAL OVERVIEW & TUTORIAL SCREEN -->
   <div id="infoPage">
     <div class="info-card">
       <div class="info-header">
         <h1>AeroGuard SOC Simulation</h1>
-        <div style="color: #aaaaaa; font-size: 14px; margin-top: 4px;">Interactive Security Dashboard Project</div>
+        <div style="color: #aaaaaa; font-size: 14px; margin-top: 4px;">Interactive Aerospace Security Dashboard</div>
+      </div>
+
+      <!-- Quick Tutorial Guide -->
+      <div class="info-section">
+        <h3>📖 Quick How-to-Play Tutorial</h3>
+        If you're new to coding or cybersecurity, don't worry! Here is how to run through the simulation step-by-step:
+        
+        <div class="tutorial-grid">
+          <div class="tutorial-step">
+            <span class="step-num">Step 1:</span> Hit <strong>"Launch Cyber Attack"</strong> on the radar screen to simulate an incoming flight breach.
+          </div>
+          <div class="tutorial-step">
+            <span class="step-num">Step 2:</span> Click on any satellite button that turns <strong style="color:#ff5555;">RED</strong> on the radar view.
+          </div>
+          <div class="tutorial-step">
+            <span class="step-num">Step 3:</span> Read the top comment line (`// BUG: ...`) in the code editor to see what's wrong.
+          </div>
+          <div class="tutorial-step">
+            <span class="step-num">Step 4:</span> Edit the mistake in the box and click <strong>"Deploy Security Patch"</strong> to save the satellite!
+          </div>
+        </div>
       </div>
 
       <!-- Problem Statement -->
@@ -260,14 +304,13 @@
 
       <!-- Connection to Theme -->
       <div class="info-section">
-        <h3>How it connects to aerospace defense:</h3>
+        <h3>How it connects to aerospace defense ("Into the Skies"):</h3>
         Satellites and high-altitude drones rely on radio signals to stay on course. If someone tampers with those signal checks or overloads the drone's memory buffer, the aircraft can lose control. In our simulation, you act as a ground security operator who catches these corrupted code lines and fixes them before the flight system fails.
       </div>
 
       <!-- Worked Example -->
       <div class="info-section">
-        <h3>How to play and fix code:</h3>
-        When a satellite gets attacked, click on its red radar tag to open its code editor. You'll read the hint comments, fix the mistake in the function, and hit deploy.
+        <h3>Code Patch Example:</h3>
         
         <div class="example-container">
           <div class="example-box">
@@ -308,7 +351,7 @@
       <div>
         <strong>Mission Control:</strong> Click <em>"Launch Random Cyber Attack"</em> to breach a target. Click the compromised <strong style="color:#ff5555;">RED dot</strong> on the radar, fix the bug in the code editor, and deploy your patch!
       </div>
-      <button class="btn-back" id="viewInfoBtn">📖 View Overview</button>
+      <button class="btn-back" id="viewInfoBtn">📖 View Tutorial & Overview</button>
     </div>
 
     <div class="main-container">
@@ -425,159 +468,4 @@
       {
         id: "AERO-STRATOS-X", radius: 130, speed: 0.006, angle: 4.8, status: "NOMINAL",
         getCode: function() {
-          return "// COMPROMISED: AERO-STRATOS-X (DOS Rate Limit Flooding)\n// BUG: Change maxRate limit to 60.\n\nfunction checkRateLimit(stream) {\n  if (stream.maxRate > 9999) {\n    return THROTTLE_CONNECTION;\n  }\n  return RATE_LIMIT_OK;\n}";
-        },
-        verifyPatch: function(code) {
-          var clean = stripCodeComments(code);
-          return clean.includes("60") && !clean.includes("9999");
-        }
-      },
-      {
-        id: "CUBE-SAT-7", radius: 150, speed: -0.005, angle: 5.5, status: "NOMINAL",
-        getCode: function() {
-          return "// COMPROMISED: CUBE-SAT-7 (Firmware Checksum Failure)\n// BUG: Set checksumValid check to true.\n\nfunction verifyFirmwareHeader(header) {\n  if (header.checksumValid == false) {\n    return FIRMWARE_CORRUPT;\n  }\n  return FIRMWARE_VALID;\n}";
-        },
-        verifyPatch: function(code) {
-          var clean = stripCodeComments(code);
-          return clean.includes("checksumValid == true") || clean.includes("checksumValid === true");
-        }
-      }
-    ];
-
-    function updateRadarAnimation() {
-      var box = document.getElementById("radarBox");
-      var centerX = (box && box.clientWidth > 0) ? (box.clientWidth / 2) : 225;
-      var centerY = (box && box.clientHeight > 0) ? (box.clientHeight / 2) : 160;
-
-      for (var i = 0; i < satelliteList.length; i++) {
-        var sat = satelliteList[i];
-        sat.angle += sat.speed;
-
-        var x = centerX + sat.radius * Math.cos(sat.angle);
-        var y = centerY + sat.radius * Math.sin(sat.angle);
-
-        var btn = document.getElementById("sat-" + sat.id);
-        if (btn) {
-          btn.style.left = x + "px";
-          btn.style.top = y + "px";
-        }
-      }
-
-      requestAnimationFrame(updateRadarAnimation);
-    }
-
-    function selectSatellite(satId) {
-      var satObj = null;
-      for (var i = 0; i < satelliteList.length; i++) {
-        if (satelliteList[i].id === satId) {
-          satObj = satelliteList[i];
-          break;
-        }
-      }
-
-      if (!satObj) return;
-      currentSelectedSat = satObj;
-
-      for (var j = 0; j < satelliteList.length; j++) {
-        var btn = document.getElementById("sat-" + satelliteList[j].id);
-        if (btn) btn.classList.remove("active-target");
-      }
-
-      var activeBtn = document.getElementById("sat-" + satId);
-      if (activeBtn) activeBtn.classList.add("active-target");
-
-      document.getElementById("selectedSatText").innerText = satObj.id + " [" + satObj.status + "]";
-      addConsoleLog("[LOCK] Targeted " + satObj.id + " (Status: " + satObj.status + ")");
-
-      if (satObj.status === "COMPROMISED") {
-        document.getElementById("codeTextarea").value = satObj.getCode();
-      } else {
-        document.getElementById("codeTextarea").value = "// " + satObj.id + " is NOMINAL. No security breach detected.";
-      }
-    }
-
-    function triggerRandomAttack() {
-      var available = [];
-      for (var i = 0; i < satelliteList.length; i++) {
-        if (satelliteList[i].status !== "COMPROMISED") {
-          available.push(satelliteList[i]);
-        }
-      }
-
-      if (available.length === 0) {
-        alert("All targets are currently under attack!");
-        return;
-      }
-
-      var randomIndex = Math.floor(Math.random() * available.length);
-      var victim = available[randomIndex];
-
-      victim.status = "COMPROMISED";
-      activeThreats++;
-
-      var btn = document.getElementById("sat-" + victim.id);
-      if (btn) btn.classList.add("hacked");
-
-      selectSatellite(victim.id);
-
-      document.getElementById("threatText").innerText = activeThreats;
-      addConsoleLog("<span class='log-red'>[CRITICAL] Security breach detected on " + victim.id + "!</span>");
-    }
-
-    function deploySecurityPatch() {
-      if (!currentSelectedSat) {
-        alert("Please select a target satellite from the radar first.");
-        return;
-      }
-
-      if (currentSelectedSat.status !== "COMPROMISED") {
-        alert("This satellite is already secure.");
-        return;
-      }
-
-      var userScript = document.getElementById("codeTextarea").value;
-
-      if (currentSelectedSat.verifyPatch(userScript)) {
-        currentSelectedSat.status = "NOMINAL";
-        activeThreats--;
-        defenseScore += 100;
-
-        var btn = document.getElementById("sat-" + currentSelectedSat.id);
-        if (btn) btn.classList.remove("hacked");
-
-        document.getElementById("scoreText").innerText = defenseScore;
-        document.getElementById("threatText").innerText = activeThreats;
-
-        addConsoleLog("<span class='log-green'>[PATCH OK] Security patch verified for " + currentSelectedSat.id + ". System restored!</span>");
-        document.getElementById("selectedSatText").innerText = currentSelectedSat.id + " [NOMINAL]";
-        document.getElementById("codeTextarea").value = "// " + currentSelectedSat.id + " is NOMINAL. Patch deployment verified.";
-      } else {
-        alert("Patch Verification Failed! Review the instructions in the code comments and correct the logic.");
-      }
-    }
-
-    function addConsoleLog(msg) {
-      var logBox = document.getElementById("consoleLog");
-      logBox.innerHTML = "<div class='log-line'>" + msg + "</div>" + logBox.innerHTML;
-    }
-
-    window.onload = function() {
-      updateRadarAnimation();
-
-      document.getElementById("startGameBtn").addEventListener("click", showGamePage);
-      document.getElementById("viewInfoBtn").addEventListener("click", showInfoPage);
-
-      document.getElementById("attackButton").addEventListener("click", triggerRandomAttack);
-      document.getElementById("patchButton").addEventListener("click", deploySecurityPatch);
-
-      for (var i = 0; i < satelliteList.length; i++) {
-        (function(id) {
-          document.getElementById("sat-" + id).addEventListener("click", function() {
-            selectSatellite(id);
-          });
-        })(satelliteList[i].id);
-      }
-    };
-  </script>
-</body>
-</html>
+          return "// COMPROMISED: AERO-STRATOS-X (DOS Rate Limit Flooding)\n// BUG: Change maxRate limit to 60.\n\nfunction checkRateLimit(
